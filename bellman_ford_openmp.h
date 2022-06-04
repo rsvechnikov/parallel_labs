@@ -19,7 +19,8 @@ std::vector<T> find_shortest_paths(Graph<T> &graph, int start, T max_value) {
         auto &arcs = graph.get_arcs();
 #pragma omp parallel for default(none) shared(arcs, dist, max_value)
         for (int j = 0; j <= arcs.size(); j++) {
-            if (dist[arcs[j].parent] != max_value && dist[arcs[j].parent] + arcs[j].weight < dist[arcs[j].child]) {
+            if (dist[arcs[j].parent] != max_value &&
+                dist[arcs[j].parent] + arcs[j].weight < dist[arcs[j].child]) {
                 dist[arcs[j].child] = dist[arcs[j].parent] + arcs[j].weight;
             }
         }
