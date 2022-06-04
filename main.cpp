@@ -1,8 +1,7 @@
 #include <iostream>
-#include <chrono>
 #include <limits>
 
-#define MODE_PTHREAD
+#define MODE_OPENMP
 
 #ifdef MODE_SERIAL
     #include "bellman_ford_serial.h"
@@ -15,14 +14,10 @@
 #endif
 
 int main() {
-    Graph<double> graph{"../graphs/smoke.txt"};
-//    std::printf("Graph:\n");
-//    graph.print_contents();
+    Graph<double> graph{"../graphs/medium.txt"};
 
-    auto t1 = std::chrono::high_resolution_clock::now();
     auto result = find_shortest_paths<double>(
             graph, 0, std::numeric_limits<double>::max());
-    auto t2 = std::chrono::high_resolution_clock::now();
 
     std::printf("Result:\n");
     for (int i = 0; i < result.size(); ++i) {
@@ -33,7 +28,5 @@ int main() {
             break;
         }
     }
-    std::chrono::duration<double, std::milli> elapsed = t2 - t1;
-    std::printf("Finished in %f ms.\n", elapsed);
     return 0;
 }
