@@ -1,5 +1,5 @@
-#ifndef PARALLEL_LABS_BELLMAN_FORD_PTHREAD_H
-#define PARALLEL_LABS_BELLMAN_FORD_PTHREAD_H
+#ifndef PARALLEL_LABS_BELLMAN_FORD_PTHREAD_SIMPLE_H
+#define PARALLEL_LABS_BELLMAN_FORD_PTHREAD_SIMPLE_H
 
 #include <pthread.h>
 #include <cmath>
@@ -7,12 +7,9 @@
 
 constexpr int THREAD_NUM = 4;
 
-pthread_barrier_t barrier;
-
 template<typename T> requires std::totally_ordered<T>
 struct ThreadArgs {
     int thread_id;
-    size_t node_count;
     T max_value;
     std::vector<Arc<T>> *arcs;
     T *dist;
@@ -31,15 +28,12 @@ void *worker_thread(void *arg) {
     const int chunk_start = tid * chunk_size;
     const int chunk_end = tid == THREAD_NUM - 1 ? arcs->size() : chunk_start + chunk_size;
 
-    for (int j = 1; j < args->node_count; j++) {
-        for (int i = chunk_start; i < chunk_end; i++) {
-            const auto &arc = arcs->at(i);
-            if (dist[arc.parent] != args->max_value &&
-                dist[arc.parent] + arc.weight < dist[arc.child]) {
-                dist[arc.child] = dist[arc.parent] + arc.weight;
-            }
+    for (int i = chunk_start; i < chunk_end; i++) {
+        const auto &arc = arcs->at(i);
+        if (dist[arc.parent] != args->max_value &&
+            dist[arc.parent] + arc.weight < dist[arc.child]) {
+            dist[arc.child] = dist[arc.parent] + arc.weight;
         }
-        pthread_barrier_wait(&barrier);
     }
     pthread_exit(nullptr);
 }
@@ -59,22 +53,15 @@ std::vector<T> find_shortest_paths(Graph<T> &graph, int start, T max_value) {
     auto arcs = graph.get_arcs();
     pthread_t threads[THREAD_NUM];
     ThreadArgs<T> thread_args[THREAD_NUM];
-    pthread_barrier_init(&barrier, nullptr, THREAD_NUM + 1);
-
-    for (int j = 0; j < THREAD_NUM; j++) {
-        thread_args[j] = {j, node_count, max_value, &arcs, dist};
-        pthread_create(&threads[j], nullptr, worker_thread<T>, &thread_args[j]);
-    }
-
-    // Sync all workers every step
     for (int i = 1; i < node_count; i++) {
-        pthread_barrier_wait(&barrier);
+        for (int j = 0; j < THREAD_NUM; j++) {
+            thread_args[j] = {j, max_value, &arcs, dist};
+            pthread_create(&threads[j], nullptr, worker_thread<T>, &thread_args[j]);
+        }
+        for (pthread_t thread: threads) {
+            pthread_join(thread, nullptr);
+        }
     }
-
-    for (pthread_t thread: threads) {
-        pthread_join(thread, nullptr);
-    }
-    pthread_barrier_destroy(&barrier);
 
     for (auto arc: graph.get_arcs()) {
         if (dist[arc.parent] != max_value && dist[arc.parent] + arc.weight < dist[arc.child]) {
@@ -86,4 +73,4 @@ std::vector<T> find_shortest_paths(Graph<T> &graph, int start, T max_value) {
     return {dist, dist + node_count};
 }
 
-#endif //PARALLEL_LABS_BELLMAN_FORD_PTHREAD_H
+#endif //PARALLEL_LABS_BELLMAN_FORD_PTHREAD_SIMPLE_H

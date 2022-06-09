@@ -7,6 +7,8 @@
     #include "bellman_ford_serial.h"
 #elif defined MODE_PTHREAD_NAIVE
     #include "bellman_ford_pthread_naive.h"
+#elif defined MODE_PTHREAD_SIMPLE
+    #include "bellman_ford_pthread_simple.h"
 #elif defined MODE_PTHREAD
     #include "bellman_ford_pthread.h"
 #elif defined MODE_OPENMP

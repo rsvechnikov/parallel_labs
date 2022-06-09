@@ -11,6 +11,9 @@
 #elif defined MODE_PTHREAD_NAIVE
     #include "bellman_ford_pthread_naive.h"
     #define MODE_NAME "pthread_naive"
+#elif defined MODE_PTHREAD_SIMPLE
+    #include "bellman_ford_pthread_simple.h"
+    #define MODE_NAME "pthread_simple"
 #elif defined MODE_PTHREAD
     #include "bellman_ford_pthread.h"
     #define MODE_NAME "pthread"

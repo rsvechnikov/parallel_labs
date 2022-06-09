@@ -11,6 +11,7 @@ add_executable(bellman_ford
         graph.h
         bellman_ford_serial.h
         bellman_ford_pthread_naive.h
+        bellman_ford_pthread_simple.h
         bellman_ford_pthread.h
         bellman_ford_openmp.h
         )
@@ -21,7 +22,7 @@ add_executable(bellman_ford_benchmark
         graph.h
         bellman_ford_serial.h
         bellman_ford_pthread_naive.h
-        bellman_ford_pthread.h
+        bellman_ford_pthread_simple.h
         bellman_ford_openmp.h
         )
 target_link_libraries(bellman_ford_benchmark PRIVATE OpenMP::OpenMP_CXX)
